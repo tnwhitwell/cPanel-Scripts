@@ -1,36 +1,35 @@
 #!/bin/bash
 
-me=$(basename "$0")
 DATE=$(date +%Y-%m-%d)
 
-if [ $# -lt 3 ]
-then
-  echo "Usage: $me retentionUnit retention accountName(s)"
-  echo "eg:"
-  echo "$me days 4 jeff steve"
-  echo "Will create backups of jeff and steve, and remove backups older than 4 days"
-  exit 1
-fi
+function usage(){
+    local problem=$(shift)
+    local me=$(basename "$0")
+    echo "$problem" >&2
+    echo "\nUsage: $me retentionUnit retention accountName(s)"
+    echo "eg:"
+    echo "$me days 4 jeff steve"
+    echo "Will create backups of jeff and steve, and remove backups older than 4 days"
+    exit 1
+}
+
+[ $# -lt 3 ] && usage "Not enough arguments."
+
 
 retention_unit=$(shift)
 retention_time=$(shift)
 
 if ! [[ "$retention_unit" =~ days|weeks ]]; then
-  echo "Incorrect retentionUnit"
-  echo "retentionUnit must be days OR weeks"
-  exit 1
+  usage "Retention unit must be days / weeks"
 fi
 
 if [[ "$retention_time" =~ [^0-9]+ ]]; then
-  echo "Invalid retention value"
-  echo "retention must be a number"
-  exit 1
+  usage "Retention value must be a number"
 fi
 
 for user in $@; do
   if [ ! -e "/var/cpanel/users/$user" ]; then
-    echo "$user is not a valid user. Please check for mistypes"
-    exit 1
+    usage "$user is not a valid user. Please check for mistypes :)"
   fi
 done
 
