@@ -4,8 +4,7 @@ set +x
 DATE=$(date +%Y-%m-%d)
 
 function usage {
-  echo $1
-  local problem=$(shift)
+  local problem=$1
   local me=$(basename "$0")
   echo "$problem" >&2
   echo "Usage: $me retentionUnit retention accountName(s)"
