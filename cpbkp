@@ -44,11 +44,13 @@ if [ ! -d "/backup/$ret_thing" ]; then
   mkdir "/backup/$ret_thing"
 fi
 
+DATE=$(date +%Y-%m-%d) # set the date :)
+
 if [ ! -d "/backup/$ret_thing/$DATE" ]; then
   mkdir "/backup/$ret_thing/$DATE"
 fi
 
 for user in $@; do
-  find "/backup/$ret_thing" -maxdepth 1 -mindepth 1 -type d -print0 | xargs -r0 stat -c %y\ %n | sort | head -n -$retention_time | uniq -u | awk '{ print $4 }' | xargs rm -rv 2>/dev/null
+  find "/backup/$ret_thing" -maxdepth 1 -mindepth 1 -type d | head -n -$retention_time | xargs rm -rfv 2>/dev/null
   /scripts/pkgacct --backup "$user" "/backup/$ret_thing/$DATE"
 done
