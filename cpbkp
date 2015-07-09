@@ -13,8 +13,9 @@ function usage(){
     exit 1
 }
 
-[ $# -lt 3 ] && usage "Not enough arguments."
-
+if [ $# -lt 3 ]; then
+  usage "Not enough arguments."
+fi
 
 retention_unit=$(shift)
 retention_time=$(shift)
