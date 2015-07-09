@@ -47,13 +47,13 @@ else
   ret_thing="monthly"
 fi
 
-if [ ! -e "/backup/$ret_thing" ]; then
+if [ ! -d "/backup/$ret_thing" ]; then
   mkdir "/backup/$ret_thing"
 fi
 
 DATE=$(date +%Y-%m-%d) # set the date :)
 
-if [ ! -e "/backup/$ret_thing/$DATE" ]; then
+if [ ! -d "/backup/$ret_thing/$DATE" ]; then
   mkdir "/backup/$ret_thing/$DATE"
 fi
 
