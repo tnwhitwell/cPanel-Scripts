@@ -1,0 +1,63 @@
+#!/bin/bash
+
+me=`basename "$0"`
+DATE=$(date +%Y-%m-%d)
+if [ $# -lt 3 ]
+then
+  echo "Usage: $me retentionUnit retention accountName(s)"
+  echo "eg:"
+  echo "$me days 4 jeff steve"
+  echo "Will create backups of jeff and steve, and remove backups older than 4 days"
+  exit 1
+fi
+
+retention_unit=$1
+retention_time=$2
+
+if ! [[ "$retention_unit" =~ days|weeks ]]
+then
+  echo "Incorrect retentionUnit"
+  echo "retentionUnit must be days OR weeks"
+  exit 1
+fi
+
+if  ! [ "$retention_time" -eq "$retention_time" ] 2> /dev/null
+then
+  echo "Invalid retention value"
+  echo "retention must be a number"
+  exit 1
+fi
+
+count=1
+for arg in $@
+do
+  if [[ $count -gt 2 ]]
+    then
+      if [ ! -e "/var/cpanel/users/$arg" ]; then
+        echo "$arg is not a valid user. Please check for mistypes"
+        exit 1
+      fi
+  fi
+  count=$count+1
+done
+
+if [ ! -e "/backup/$(if [ "$retention_unit" == "days" ]; then echo "daily"; else echo "weekly"; fi)" ]
+  then
+  mkdir /backup/$(if [ "$retention_unit" == "days" ]; then echo "daily"; else echo "weekly"; fi)
+fi
+
+if [ ! -e "/backup/$(if [ "$retention_unit" == "days" ]; then echo "daily"; else echo "weekly"; fi)/$DATE" ]
+  then
+  mkdir /backup/$(if [ "$retention_unit" == "days" ]; then echo "daily"; else echo "weekly"; fi)/$DATE
+fi
+
+count=1
+for arg in $@
+do
+  if [[ $count -gt 2 ]]
+    then
+      find /backup/$(if [ "$retention_unit" == "days" ]; then echo "daily"; else echo "weekly"; fi) -maxdepth 1 -mindepth 1 -type d -print0 | xargs -r0 stat -c %y\ %n | sort | head -n -$retention_time | uniq -u | awk '{ print $4 }' | xargs rm -rv 2>/dev/null
+      /scripts/pkgacct --backup $arg /backup/$(if [ "$retention_unit" == "days" ]; then echo "daily"; else echo "weekly"; fi)/$DATE
+  fi
+  count=$count+1
+done
