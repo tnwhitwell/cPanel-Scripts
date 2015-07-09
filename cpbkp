@@ -6,7 +6,7 @@ function usage(){
     local problem=$(shift)
     local me=$(basename "$0")
     echo "$problem" >&2
-    echo "\nUsage: $me retentionUnit retention accountName(s)"
+    echo "Usage: $me retentionUnit retention accountName(s)"
     echo "eg:"
     echo "$me days 4 jeff steve"
     echo "Will create backups of jeff and steve, and remove backups older than 4 days"
