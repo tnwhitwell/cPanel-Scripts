@@ -51,7 +51,7 @@ if [ ! -d "/backup/$ret_thing" ]; then
   mkdir "/backup/$ret_thing"
 fi
 
-DATE=$(date +%Y-%m-%d) # set the date :)
+DATE=$(date --u +%Y-%m-%d) # set the date :)
 
 if [ ! -d "/backup/$ret_thing/$DATE" ]; then
   mkdir "/backup/$ret_thing/$DATE"
