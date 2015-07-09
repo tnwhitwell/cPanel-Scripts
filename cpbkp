@@ -27,22 +27,28 @@ if [[ "$retention_time" =~ [^0-9]+ ]]; then
   exit 1
 fi
 
-for arg in $@; do
-  if [ ! -e "/var/cpanel/users/$arg" ]; then
-    echo "$arg is not a valid user. Please check for mistypes"
+for user in $@; do
+  if [ ! -e "/var/cpanel/users/$user" ]; then
+    echo "$user is not a valid user. Please check for mistypes"
     exit 1
   fi
 done
 
-if [ ! -e "/backup/$(if [ "$retention_unit" == "days" ]; then echo "daily"; else echo "weekly"; fi)" ]; then
-  mkdir /backup/$(if [ "$retention_unit" == "days" ]; then echo "daily"; else echo "weekly"; fi)
+if [ "$retention_unit" == "days" ]; then
+  ret_thing="daily"
+else
+  ret_thing="weekly"
 fi
 
-if [ ! -e "/backup/$(if [ "$retention_unit" == "days" ]; then echo "daily"; else echo "weekly"; fi)/$DATE" ]; then
-  mkdir /backup/$(if [ "$retention_unit" == "days" ]; then echo "daily"; else echo "weekly"; fi)/$DATE
+if [ ! -d "/backup/$ret_thing" ]; then
+  mkdir "/backup/$ret_thing"
 fi
 
-for arg in $@; do
-  find /backup/$(if [ "$retention_unit" == "days" ]; then echo "daily"; else echo "weekly"; fi) -maxdepth 1 -mindepth 1 -type d -print0 | xargs -r0 stat -c %y\ %n | sort | head -n -$retention_time | uniq -u | awk '{ print $4 }' | xargs rm -rv 2>/dev/null
-  /scripts/pkgacct --backup $arg /backup/$(if [ "$retention_unit" == "days" ]; then echo "daily"; else echo "weekly"; fi)/$DATE
+if [ ! -d "/backup/$ret_thing/$DATE" ]; then
+  mkdir "/backup/$ret_thing/$DATE"
+fi
+
+for user in $@; do
+  find "/backup/$ret_thing" -maxdepth 1 -mindepth 1 -type d -print0 | xargs -r0 stat -c %y\ %n | sort | head -n -$retention_time | uniq -u | awk '{ print $4 }' | xargs rm -rv 2>/dev/null
+  /scripts/pkgacct --backup $user "/backup/$ret_thing/$DATE"
 done
