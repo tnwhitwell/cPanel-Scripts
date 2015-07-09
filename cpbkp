@@ -1,6 +1,4 @@
 #!/bin/bash
-set +x
-
 DATE=$(date +%Y-%m-%d)
 
 function usage {
@@ -18,8 +16,9 @@ if [ $# -lt 3 ]; then
   usage "Not enough arguments."
 fi
 
-retention_unit=$(shift)
-retention_time=$(shift)
+retention_unit=$1
+retention_time=$2
+shift 2
 
 if ! [[ "$retention_unit" =~ days|weeks ]]; then
   usage "Retention unit must be days / weeks"
