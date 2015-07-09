@@ -4,10 +4,16 @@ function usage {
   local problem=$1
   local me=$(basename "$0")
   echo "$problem" >&2
+  echo
   echo "Usage: $me retentionUnit retention accountName..."
-  echo "eg:"
+  echo
   echo "  $me days 4 jeff steve"
-  echo "Will create backups of jeff and steve, and remove backups older than 4 days"
+  echo
+  echo "Create backups of jeff and steve, and remove backups older than 4 days"
+  echo
+  echo "retentionUnit: days, weeks, months"
+  echo "retention: Number of retentionUnits"
+  echo "accountName: one or more account names, seperated by spaces."
   exit 1
 }
 
