@@ -56,9 +56,16 @@ if ! [[ "$backup_type" =~ daily|weekly|monthly ]]; then
   usage "Backup type must be daily / weekly / monthly"
 fi
 
-# if [ ! -d "/backup/$backup_type" ]; then
-#   mkdir "/backup/$backup_type"
-# fi
+cmd=
+
+if [ ! -d "/backup/$backup_type" ]; then
+  cmd=mkdir "/backup/$backup_type"
+  if [ "$dry" = true ]; then
+    echo "Would $cmd"
+  else
+    $cmd
+  fi
+fi
 #
 # DATE=$(date --u +%Y-%m-%d) # set the date :)
 #
