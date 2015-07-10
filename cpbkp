@@ -142,6 +142,6 @@ for user in ${backup_users[@]}; do
     find "$backup_folder" -maxdepth 1 -mindepth 1 -type d | head -n -$retention_time | xargs rm -rfv 2>/dev/null # remove backups older than specified retention time
   fi
 
-  would "/scripts/pkgacct --backup $user $backup_subfolder" # actually do backup!
+  would "/scripts/pkgacct --userbackup $user $backup_subfolder" # actually do backup!
 
 done
