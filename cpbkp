@@ -36,7 +36,6 @@ monthly_users=($(cd /var/cpanel/users/ && ls -d *))
 for tUser in ${all_users[@]}; do
   monthly_users=(${monthly_users[@]//*$tUser*})
 done
-echo ${monthly_users[@]}
 
 if [ $# -lt 1 ]; then
   usage "Not enough arguments."
@@ -86,11 +85,11 @@ fi
 
 backup_users=()
 case $backup_type in
-  daily ) backup_users=($daily_users)
+  daily ) backup_users=(${daily_users[@]})
     ;;
-  weekly ) backup_users=($weekly_users)
+  weekly ) backup_users=(${weekly_users[@]})
     ;;
-  monthly ) backup_users=($monthly_users)
+  monthly ) backup_users=(${monthly_users[@]})
     ;;
 esac
 
