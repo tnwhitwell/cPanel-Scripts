@@ -23,12 +23,12 @@ weekly_users=($weekly_users)
 all_users=( "${daily_users[@]} ${weekly_users[@]}")
 other_users=()
 for user in ${all_users[@]}; do
-  echo $user
+  echo "$user is a named user"
   if [ ! -e "/var/cpanel/users/$user" ]; then
     usage "$user is not a valid user. Please check for mistypes :)"
   fi
 done
-
+echo
 actual_users=($(cd /var/cpanel/users/ && ls -d *))
 monthly_users=()
 for aUser in ${actual_users[@]}; do
