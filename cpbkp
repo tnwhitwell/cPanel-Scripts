@@ -6,13 +6,14 @@ function usage {
   local me=$(basename "$0")
   echo "$problem" >&2
   echo
-  echo "Usage: $me backuptype"
+  echo "Usage: $me backuptype [dry]"
   echo
   echo "  $me daily"
   echo
   echo "Run daily backup"
   echo
-  echo "backuptype: dayily, weekly, monthly"
+  echo "backuptype: daily, weekly, monthly"
+  echo "add dry to dry run without making changes"
   exit 1
 }
 echo "Reading config from $config_file_path"
@@ -26,7 +27,6 @@ weekly_users=($weekly_users)
 all_users=( "${daily_users[@]} ${weekly_users[@]}")
 other_users=()
 for user in ${all_users[@]}; do
-  echo "$user is a named user"
   if [ ! -e "/var/cpanel/users/$user" ]; then
     usage "$user is not a valid user. Please check for mistypes :)"
   fi
@@ -40,35 +40,16 @@ done
 if [ $# -lt 1 ]; then
   usage "Not enough arguments."
 fi
-#
-# retention_unit=$1
-# retention_time=$2
-# shift 2
-#
-# if ! [[ "$retention_unit" =~ days|weeks|months ]]; then
-#   usage "Retention unit must be days / weeks / months"
-# fi
-#
-# if [[ "$retention_time" =~ [^0-9]+ ]]; then
-#   usage "Retention value must be a number"
-# fi
-#
-# for user in $@; do
-#   if [ ! -e "/var/cpanel/users/$user" ]; then
-#     usage "$user is not a valid user. Please check for mistypes :)"
-#   fi
-# done
-#
-# if [ "$retention_unit" == "days" ]; then
-#   ret_thing="daily"
-# elif [ "$retention_unit" == "weeks" ]; then
-#   ret_thing="weekly"
-# else
-#   ret_thing="monthly"
-# fi
-#
-# if [ ! -d "/backup/$ret_thing" ]; then
-#   mkdir "/backup/$ret_thing"
+
+backup_type=$1
+shift
+
+if ! [[ "$backup_type" =~ daily|weekly|monthly ]]; then
+  usage "Backup type must be daily / weekly / monthly"
+fi
+
+# if [ ! -d "/backup/$backup_type" ]; then
+#   mkdir "/backup/$backup_type"
 # fi
 #
 # DATE=$(date --u +%Y-%m-%d) # set the date :)
