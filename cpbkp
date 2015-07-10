@@ -1,23 +1,25 @@
 #!/bin/bash
-
+config_file_path=./cpbkp.conf
 function usage {
   local problem=$1
   local me=$(basename "$0")
   echo "$problem" >&2
   echo
-  echo "Usage: $me retentionUnit retention accountName..."
+  echo "Usage: $me backuptype"
   echo
-  echo "  $me days 4 jeff steve"
+  echo "  $me daily"
   echo
-  echo "Create backups of jeff and steve, and remove backups older than 4 days"
+  echo "Run daily backup"
   echo
-  echo "retentionUnit: days, weeks, months"
-  echo "retention: Number of retentionUnits"
-  echo "accountName: one or more account names, seperated by spaces."
+  echo "backuptype: dayily, weekly, monthly"
   exit 1
 }
 echo "Reading config"
-source ./cpbkp.conf
+if [ ! -e "$config_file_path" ]; then
+  source $config_file_path
+else echo "Config file missing"
+fi
+
 daily_users=($daily_users)
 weekly_users=($weekly_users)
 all_users=( "${daily_users[@]} ${weekly_users[@]}")
@@ -34,11 +36,6 @@ for tUser in ${all_users[@]}; do
   echo "testing $tUser"
   monthly_users=(${monthly_users[@]//*$tUser*})
 done
-
-for aUser in ${monthly_users[@]}; do
-  echo "$aUser is a monthly user"
-done
-
 # echo "Other Users (monthly): Other"
 # if [ $# -lt 3 ]; then
 #   usage "Not enough arguments."
