@@ -93,7 +93,7 @@ case $backup_type in
     ;;
 esac
 
-for user in ${"backup_users[@]}; do
+for user in ${backup_users[@]}; do
   echo $user
 done
 
