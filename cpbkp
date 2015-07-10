@@ -76,7 +76,7 @@ if [ ! -d "/backup/$backup_type/$DATE" ]; then
     $cmd
   fi
 fi
-for tUser in ${${!backup_type}_users[@]}; do
+for tUser in ${'$backup_type'_users[@]}; do
   echo $tUser
 done
 
