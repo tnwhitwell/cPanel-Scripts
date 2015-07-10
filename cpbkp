@@ -50,7 +50,6 @@ if [ ! -z ${1+x} ]; then
     shift
   fi
 fi
-echo $dry
 
 if ! [[ "$backup_type" =~ daily|weekly|monthly ]]; then
   usage "Backup type must be daily / weekly / monthly"
