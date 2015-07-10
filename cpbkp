@@ -97,7 +97,19 @@ for user in ${backup_users[@]}; do
   echo $user
 done
 
-# for user in $@; do
-#   cmd="find /backup/$backup_type -maxdepth 1 -mindepth 1 -type d | head -n -$retention_time | xargs rm -rfv 2>/dev/null"
-#   cmd="/scripts/pkgacct --backup $user /backup/$ret_thing/$DATE"
-# done
+for user in ${backup_users[@]}; do
+  cmd="find /backup/$backup_type -maxdepth 1 -mindepth 1 -type d | head -n -$retention_time | xargs rm -rfv 2>/dev/null"
+  if [ "$dry" = true ]; then
+    echo "Would $cmd"
+  else
+    $cmd
+  fi
+
+  cmd="/scripts/pkgacct --backup $user /backup/$ret_thing/$DATE"
+  if [ "$dry" = true ]; then
+    echo "Would $cmd"
+  else
+    $cmd
+  fi
+  echo
+done
