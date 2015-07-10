@@ -16,6 +16,7 @@ function usage {
   echo "add dry to dry run without making changes"
   exit 1
 }
+
 echo "Reading config from $config_file_path"
 if [ -e "$config_file_path" ]; then
   source $config_file_path
@@ -75,8 +76,11 @@ if [ ! -d "/backup/$backup_type/$DATE" ]; then
     $cmd
   fi
 fi
-#
+for tUser in ${${!backup_type}_users[@]}; do
+  echo $tUser
+done
+
 # for user in $@; do
-#   find "/backup/$ret_thing" -maxdepth 1 -mindepth 1 -type d | head -n -$retention_time | xargs rm -rfv 2>/dev/null
-#   /scripts/pkgacct --backup "$user" "/backup/$ret_thing/$DATE"
+#   cmd="find /backup/$ret_thing -maxdepth 1 -mindepth 1 -type d | head -n -$retention_time | xargs rm -rfv 2>/dev/null"
+#   cmd="/scripts/pkgacct --backup $user /backup/$ret_thing/$DATE"
 # done
