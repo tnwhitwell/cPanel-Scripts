@@ -34,13 +34,12 @@ done
 echo
 monthly_users=($(cd /var/cpanel/users/ && ls -d *))
 for tUser in ${all_users[@]}; do
-  echo "testing $tUser"
   monthly_users=(${monthly_users[@]//*$tUser*})
 done
-# echo "Other Users (monthly): Other"
-# if [ $# -lt 3 ]; then
-#   usage "Not enough arguments."
-# fi
+
+if [ $# -lt 1 ]; then
+  usage "Not enough arguments."
+fi
 #
 # retention_unit=$1
 # retention_time=$2
