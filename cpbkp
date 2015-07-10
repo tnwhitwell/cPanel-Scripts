@@ -21,7 +21,13 @@ source ./cpbkp.conf
 daily_users=($daily_users)
 weekly_users=($weekly_users)
 all_users=( "${daily_users[@]} ${weekly_users[@]}")
-for i in ${all_users[@]}; do echo $i; done
+other_users=()
+for i in ${all_users[@]}; do
+  echo $i;
+  if [ ! -e "/var/cpanel/users/$i" ]; then
+    usage "$user is not a valid user. Please check for mistypes :)"
+done
+
 
 # echo "Other Users (monthly): Other"
 # if [ $# -lt 3 ]; then
