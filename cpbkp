@@ -1,5 +1,5 @@
 #!/bin/bash
-config_file_path=./cpbkp.cfg
+config_file_path=/etc/cpbkp-memset.cfg
 
 # usage function
 function usage {
