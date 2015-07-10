@@ -38,7 +38,7 @@ else
 daily_users=\" \"
 
 # Users to be backed up weekly (seperated by spaces, surrounded by quotes)
-# eg: daily_users=\"tom jeff joe\"
+# eg: weekly_users=\"tom jeff joe\"
 weekly_users=\" \"
 
 # retention time for backups (self-explanatory)
