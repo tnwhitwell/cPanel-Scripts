@@ -16,6 +16,7 @@ function usage {
 }
 echo "Reading config"
 if [ ! -e "$config_file_path" ]; then
+  echo $config_file_path
   source $config_file_path
 else echo "Config file missing"
 fi
