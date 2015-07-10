@@ -48,6 +48,7 @@ if [ ! -z ${1+x} ]; then
   if [ "$1" == "dry" ]; then
     dry=true
     shift
+  fi
 fi
 echo $dry
 
