@@ -43,22 +43,28 @@ fi
 
 backup_type=$1
 shift
-dry=false
-if [ ! -z ${1+x} ]; then
-  if [ "$1" == "dry" ]; then
-    dry=true
-    shift
-  fi
-fi
 
 if ! [[ "$backup_type" =~ daily|weekly|monthly ]]; then
   usage "Backup type must be daily / weekly / monthly"
 fi
 
+dry=false
+if [ ! -z ${1+x} ]; then
+  if [ "$1" == "dry" ]; then
+    dry=true
+    shift
+  else
+    usage "dry must be \"dry\" or unset"
+  fi
+fi
+DATE=$(date --u +%Y-%m-%d) # set the date :)
+backup_folder="/backup/$backup_type"
+backup_subfolder="/backup/$backup_type/$DATE"
+
 cmd=
 
-if [ ! -d "/backup/$backup_type" ]; then
-  cmd="mkdir /backup/$backup_type"
+if [ ! -d "$backup_folder" ]; then
+  cmd="mkdir $backup_folder"
   if [ "$dry" = true ]; then
     echo "Would $cmd"
   else
@@ -66,21 +72,32 @@ if [ ! -d "/backup/$backup_type" ]; then
   fi
 fi
 
-DATE=$(date --u +%Y-%m-%d) # set the date :)
 
-if [ ! -d "/backup/$backup_type/$DATE" ]; then
-  cmd="mkdir /backup/$backup_type/$DATE"
+
+if [ ! -d "$backup_subfolder" ]; then
+  cmd="mkdir $backup_subfolder"
   if [ "$dry" = true ]; then
     echo "Would $cmd"
   else
     $cmd
   fi
 fi
-for tUser in ${"$backup_type"_users[@]}; do
-  echo $tUser
+
+backup_users=()
+case $backup_type in
+  daily ) backup_users=($daily_users)
+    ;;
+  weekly ) backup_users=($weekly_users)
+    ;;
+  monthly ) backup_users=($monthly_users)
+    ;;
+esac
+
+for user in ${"backup_users[@]}; do
+  echo $user
 done
 
 # for user in $@; do
-#   cmd="find /backup/$ret_thing -maxdepth 1 -mindepth 1 -type d | head -n -$retention_time | xargs rm -rfv 2>/dev/null"
+#   cmd="find /backup/$backup_type -maxdepth 1 -mindepth 1 -type d | head -n -$retention_time | xargs rm -rfv 2>/dev/null"
 #   cmd="/scripts/pkgacct --backup $user /backup/$ret_thing/$DATE"
 # done
