@@ -36,6 +36,7 @@ monthly_users=($(cd /var/cpanel/users/ && ls -d *))
 for tUser in ${all_users[@]}; do
   monthly_users=(${monthly_users[@]//*$tUser*})
 done
+echo ${monthly_users[@]}
 
 if [ $# -lt 1 ]; then
   usage "Not enough arguments."
