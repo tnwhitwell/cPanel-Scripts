@@ -35,6 +35,9 @@ for aUser in ${actual_users[@]}; do
   monthly_users=(${all_users[@]//*$auser*})
 done
 
+for aUser in ${monthly_users[@]}; do
+  echo "$aUser is a monthly user"
+done
 
 # echo "Other Users (monthly): Other"
 # if [ $# -lt 3 ]; then
