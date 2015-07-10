@@ -136,7 +136,7 @@ esac
 # run through all specified users
 for user in ${backup_users[@]}; do
   echo $backup_folder
-  would "find \"$backup_folder\" -maxdepth 1 -mindepth 1 -type d | head -n -$retention_time | xargs rm -rfv 2>/dev/null" # remove backups older than specified retention time
+  would "find -maxdepth 1 -mindepth 1 -type d | head -n -$retention_time \"$backup_folder\" | xargs rm -rfv 2>/dev/null" # remove backups older than specified retention time
 
   would "/scripts/pkgacct --backup $user $backup_subfolder" # actually do backup!
 
