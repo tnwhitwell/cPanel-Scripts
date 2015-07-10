@@ -31,7 +31,6 @@ for user in ${all_users[@]}; do
     usage "$user is not a valid user. Please check for mistypes :)"
   fi
 done
-echo
 monthly_users=($(cd /var/cpanel/users/ && ls -d *))
 for tUser in ${all_users[@]}; do
   monthly_users=(${monthly_users[@]//*$tUser*})
