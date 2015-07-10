@@ -31,8 +31,8 @@ done
 echo
 actual_users=($(cd /var/cpanel/users/ && ls -d *))
 monthly_users=()
-for aUser in ${actual_users[@]}; do
-  monthly_users=(${all_users[@]//*$aUser*})
+for tUser in ${all_users[@]}; do
+  monthly_users=(${actual_users[@]//*$tUser*})
 done
 
 for aUser in ${monthly_users[@]}; do
