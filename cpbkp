@@ -1,5 +1,5 @@
 #!/bin/bash
-config_file_path=./cpbkp.conf
+config_file_path=cpbkp.conf
 function usage {
   local problem=$1
   local me=$(basename "$0")
