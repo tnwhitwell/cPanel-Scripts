@@ -30,8 +30,13 @@ for user in ${all_users[@]}; do
 done
 
 actual_users=($(cd /var/cpanel/users/ && ls -d *))
-for user in ${actual_users[@]}; do
-  echo $user
+monthly_users=()
+for aUser in ${actual_users[@]}; do
+  for tUser in ${all_users[@]}; do
+    if [ "$aUser" != "$tUser" ]; then
+      echo "$tUser is a monthly user"
+    fi
+  done
 done
 
 
