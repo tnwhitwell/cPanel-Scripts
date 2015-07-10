@@ -1,6 +1,7 @@
 #!/bin/bash
 config_file_path=./cpbkp.conf
 
+# usage function
 function usage {
   local problem=$1
   local me=$(basename "$0")
@@ -16,6 +17,8 @@ function usage {
   echo "add dry to dry run without making changes"
   exit 1
 }
+
+# would function for dry-runs
 function would {
   cmd="$1"
   if [ "$dry" = true ]; then
@@ -24,37 +27,45 @@ function would {
     $cmd
   fi
 }
+
 echo "Reading config from $config_file_path"
-if [ -e "$config_file_path" ]; then
+if [ -e "$config_file_path" ]; then # check config file exists
   source $config_file_path
-else echo "Config file missing"
+else
+  usage "Config file missing"
 fi
 
-daily_users=($daily_users)
-weekly_users=($weekly_users)
-all_users=( "${daily_users[@]} ${weekly_users[@]}")
-other_users=()
+daily_users=($daily_users) # create array from config file
+weekly_users=($weekly_users) # create array from config file
+all_users=( "${daily_users[@]} ${weekly_users[@]}") # merge arrays for seeing which users are not set (ie. default to monthly)
+
+# sanity check users
 for user in ${all_users[@]}; do
   if [ ! -e "/var/cpanel/users/$user" ]; then
     usage "$user is not a valid user. Please check for mistypes :)"
   fi
 done
-monthly_users=($(cd /var/cpanel/users/ && ls -d *))
+
+monthly_users=($(cd /var/cpanel/users/ && ls -d *)) # init monthly_users to current cpanel users (to have set users removed)
 for tUser in ${all_users[@]}; do
-  monthly_users=(${monthly_users[@]//*$tUser*})
+  monthly_users=(${monthly_users[@]//*$tUser*}) # remove set user from list!
 done
 
+#check if any arguments are set
 if [ $# -lt 1 ]; then
   usage "Not enough arguments."
 fi
 
+#get backup type from 1st argument
 backup_type=$1
 shift
 
+# sanity check backup type
 if ! [[ "$backup_type" =~ daily|weekly|monthly ]]; then
   usage "Backup type must be daily / weekly / monthly"
 fi
 
+# check if dry-run was requested
 dry=false
 if [ ! -z ${1+x} ]; then
   if [ "$1" == "dry" ]; then
@@ -64,59 +75,43 @@ if [ ! -z ${1+x} ]; then
     usage "dry must be \"dry\" or unset"
   fi
 fi
+
+# set useful variables
 DATE=$(date --u +%Y-%m-%d) # set the date :)
-backup_folder="/backup/$backup_type"
-backup_subfolder="/backup/$backup_type/$DATE"
+backup_folder="/backup/$backup_type" # folder backup will be put in
+backup_subfolder="/backup/$backup_type/$DATE" # subfolder with date
 
-cmd=
+cmd= # clear cmd variable
 
+# make backup type folder
 if [ ! -d "$backup_folder" ]; then
-  cmd="mkdir $backup_folder"
-  if [ "$dry" = true ]; then
-    echo "Would $cmd"
-  else
-    $cmd
-  fi
+  would "mkdir $backup_folder"
 fi
 
-
-
+# make backup type subfolder
 if [ ! -d "$backup_subfolder" ]; then
-  cmd="mkdir $backup_subfolder"
-  if [ "$dry" = true ]; then
-    echo "Would $cmd"
-  else
-    $cmd
-  fi
+  would "mkdir $backup_subfolder"
 fi
 
-backup_users=()
+backup_users=() # init blank array for users of this backup
+
+# nicely set users to their backup type
 case $backup_type in
   daily ) backup_users=(${daily_users[@]})
+          retention_time=$daily_retention
     ;;
   weekly ) backup_users=(${weekly_users[@]})
+           retention_time=$weekly_retention
     ;;
   monthly ) backup_users=(${monthly_users[@]})
+            retention_time=$monthly_retention
     ;;
 esac
 
+# run through all specified users
 for user in ${backup_users[@]}; do
-  echo $user
-done
+  would "find $backup_folder -maxdepth 1 -mindepth 1 -type d | head -n -$retention_time | xargs rm -rfv 2>/dev/null" # remove backups older than specified retention time
 
-for user in ${backup_users[@]}; do
-  would "find $backup_folder -maxdepth 1 -mindepth 1 -type d | head -n -$retention_time | xargs rm -rfv 2>/dev/null"
-  # if [ "$dry" = true ]; then
-  #   echo "Would $cmd"
-  # else
-  #   $cmd
-  # fi
+  would "/scripts/pkgacct --backup $user $backup_subfolder" # actually do backup!
 
-  cmd="/scripts/pkgacct --backup $user $backup_subfolder"
-  if [ "$dry" = true ]; then
-    echo "Would $cmd"
-  else
-    $cmd
-  fi
-  echo
 done
