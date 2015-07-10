@@ -22,10 +22,11 @@ daily_users=($daily_users)
 weekly_users=($weekly_users)
 all_users=( "${daily_users[@]} ${weekly_users[@]}")
 other_users=()
-for i in ${all_users[@]}; do
-  echo $i;
-  if [ ! -e "/var/cpanel/users/$i" ]; then
-    usage "$user is not a valid user. Please check for mistypes :)"
+for user in ${all_users[@]}; do
+  # echo $user
+  # if [ ! -e "/var/cpanel/users/$i" ]; then
+  #   usage "$user is not a valid user. Please check for mistypes :)"
+  # fi
 done
 
 
