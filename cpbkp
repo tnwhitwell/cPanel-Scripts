@@ -16,48 +16,54 @@ function usage {
   echo "accountName: one or more account names, seperated by spaces."
   exit 1
 }
+echo "Reading config"
+source ./cpbkp.conf
+daily_users=($daily_users)
+weekly_users=($weekly_users)
+for i in ${daily_users[@]}; do echo $i; done
 
-if [ $# -lt 3 ]; then
-  usage "Not enough arguments."
-fi
-
-retention_unit=$1
-retention_time=$2
-shift 2
-
-if ! [[ "$retention_unit" =~ days|weeks|months ]]; then
-  usage "Retention unit must be days / weeks / months"
-fi
-
-if [[ "$retention_time" =~ [^0-9]+ ]]; then
-  usage "Retention value must be a number"
-fi
-
-for user in $@; do
-  if [ ! -e "/var/cpanel/users/$user" ]; then
-    usage "$user is not a valid user. Please check for mistypes :)"
-  fi
-done
-
-if [ "$retention_unit" == "days" ]; then
-  ret_thing="daily"
-elif [ "$retention_unit" == "weeks" ]; then
-  ret_thing="weekly"
-else
-  ret_thing="monthly"
-fi
-
-if [ ! -d "/backup/$ret_thing" ]; then
-  mkdir "/backup/$ret_thing"
-fi
-
-DATE=$(date --u +%Y-%m-%d) # set the date :)
-
-if [ ! -d "/backup/$ret_thing/$DATE" ]; then
-  mkdir "/backup/$ret_thing/$DATE"
-fi
-
-for user in $@; do
-  find "/backup/$ret_thing" -maxdepth 1 -mindepth 1 -type d | head -n -$retention_time | xargs rm -rfv 2>/dev/null
-  /scripts/pkgacct --backup "$user" "/backup/$ret_thing/$DATE"
-done
+# echo "Other Users (monthly): Other"
+# if [ $# -lt 3 ]; then
+#   usage "Not enough arguments."
+# fi
+#
+# retention_unit=$1
+# retention_time=$2
+# shift 2
+#
+# if ! [[ "$retention_unit" =~ days|weeks|months ]]; then
+#   usage "Retention unit must be days / weeks / months"
+# fi
+#
+# if [[ "$retention_time" =~ [^0-9]+ ]]; then
+#   usage "Retention value must be a number"
+# fi
+#
+# for user in $@; do
+#   if [ ! -e "/var/cpanel/users/$user" ]; then
+#     usage "$user is not a valid user. Please check for mistypes :)"
+#   fi
+# done
+#
+# if [ "$retention_unit" == "days" ]; then
+#   ret_thing="daily"
+# elif [ "$retention_unit" == "weeks" ]; then
+#   ret_thing="weekly"
+# else
+#   ret_thing="monthly"
+# fi
+#
+# if [ ! -d "/backup/$ret_thing" ]; then
+#   mkdir "/backup/$ret_thing"
+# fi
+#
+# DATE=$(date --u +%Y-%m-%d) # set the date :)
+#
+# if [ ! -d "/backup/$ret_thing/$DATE" ]; then
+#   mkdir "/backup/$ret_thing/$DATE"
+# fi
+#
+# for user in $@; do
+#   find "/backup/$ret_thing" -maxdepth 1 -mindepth 1 -type d | head -n -$retention_time | xargs rm -rfv 2>/dev/null
+#   /scripts/pkgacct --backup "$user" "/backup/$ret_thing/$DATE"
+# done
