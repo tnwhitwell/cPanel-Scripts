@@ -32,7 +32,7 @@ echo "Reading config from $config_file_path"
 if [ -e "$config_file_path" ]; then # check config file exists
   source $config_file_path
 else
-  echo "Config file missing. Creating blank file at $config_file_path"
+  echo "Config file missing. Creating blank file at $config_file_path" >&2
   out_file="# Users to be backed up daily (seperated by spaces, surrounded by quotes)
   # eg: daily_users=\"tom jeff joe\"
   daily_users=\" \"
@@ -46,6 +46,7 @@ else
   weekly_retention=1
   monthly_retention=1"
   echo "$out_file" > $config_file_path
+  exit 1
 fi
 
 daily_users=($daily_users) # create array from config file
