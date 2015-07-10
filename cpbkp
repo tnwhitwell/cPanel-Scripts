@@ -20,7 +20,8 @@ echo "Reading config"
 source ./cpbkp.conf
 daily_users=($daily_users)
 weekly_users=($weekly_users)
-for i in ${daily_users[@]}; do echo $i; done
+all_users=( "${daily_users[@]} ${weekly_users[@]}")
+for i in ${all_users[@]}; do echo $i; done
 
 # echo "Other Users (monthly): Other"
 # if [ $# -lt 3 ]; then
