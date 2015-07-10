@@ -64,12 +64,17 @@ if [ ! -d "/backup/$backup_type" ]; then
     $cmd
   fi
 fi
-#
-# DATE=$(date --u +%Y-%m-%d) # set the date :)
-#
-# if [ ! -d "/backup/$ret_thing/$DATE" ]; then
-#   mkdir "/backup/$ret_thing/$DATE"
-# fi
+
+DATE=$(date --u +%Y-%m-%d) # set the date :)
+
+if [ ! -d "/backup/$backup_type/$DATE" ]; then
+  cmd="mkdir /backup/$backup_type/$DATE"
+  if [ "$dry" = true ]; then
+    echo "Would $cmd"
+  else
+    $cmd
+  fi
+fi
 #
 # for user in $@; do
 #   find "/backup/$ret_thing" -maxdepth 1 -mindepth 1 -type d | head -n -$retention_time | xargs rm -rfv 2>/dev/null
