@@ -105,14 +105,14 @@ for user in ${backup_users[@]}; do
 done
 
 for user in ${backup_users[@]}; do
-  would "find /backup/$backup_type -maxdepth 1 -mindepth 1 -type d | head -n -$retention_time | xargs rm -rfv 2>/dev/null"
+  would "find $backup_folder -maxdepth 1 -mindepth 1 -type d | head -n -$retention_time | xargs rm -rfv 2>/dev/null"
   # if [ "$dry" = true ]; then
   #   echo "Would $cmd"
   # else
   #   $cmd
   # fi
 
-  cmd="/scripts/pkgacct --backup $user /backup/$ret_thing/$DATE"
+  cmd="/scripts/pkgacct --backup $user $backup_subfolder"
   if [ "$dry" = true ]; then
     echo "Would $cmd"
   else
