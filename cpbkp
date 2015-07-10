@@ -57,7 +57,7 @@ fi
 cmd=
 
 if [ ! -d "/backup/$backup_type" ]; then
-  cmd="mkdir \"/backup/$backup_type\""
+  cmd="mkdir '/backup/$backup_type'"
   if [ "$dry" = true ]; then
     echo "Would $cmd"
   else
