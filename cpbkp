@@ -33,20 +33,19 @@ if [ -e "$config_file_path" ]; then # check config file exists
   source $config_file_path
 else
   echo "Config file missing. Creating blank file at $config_file_path"
-  cat > $config_file_path << EOF
-  # Users to be backed up daily (seperated by spaces, surrounded by quotes)
-  # eg: daily_users="tom jeff joe"
-  daily_users=" "
+  out_file="# Users to be backed up daily (seperated by spaces, surrounded by quotes)
+  # eg: daily_users=\"tom jeff joe\"
+  daily_users=\" \"
 
   # Users to be backed up weekly (seperated by spaces, surrounded by quotes)
-  # eg: daily_users="tom jeff joe"
-  weekly_users=" "
+  # eg: daily_users=\"tom jeff joe\"
+  weekly_users=\" \"
 
   # retention time for backups (self-explanatory)
   daily_retention=1
   weekly_retention=1
-  monthly_retention=1
-  EOF
+  monthly_retention=1"
+  echo "$out_file" > $config_file_path
 fi
 
 daily_users=($daily_users) # create array from config file
