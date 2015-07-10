@@ -49,8 +49,19 @@ monthly_retention=1"
   exit 1
 fi
 
-daily_users=($daily_users) # create array from config file
-weekly_users=($weekly_users) # create array from config file
+
+if [ ! -z ${daily_users+x} ]; then
+  daily_users=($daily_users) # create array from config file
+else
+  daily_users=()
+fi
+
+if [ ! -z ${weekly_users+x} ]; then
+  weekly_users=($daily_users) # create array from config file
+else
+  weekly_users=()
+fi
+
 all_users=( "${daily_users[@]} ${weekly_users[@]}") # merge arrays for seeing which users are not set (ie. default to monthly)
 
 # sanity check users
