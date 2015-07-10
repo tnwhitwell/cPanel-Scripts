@@ -25,7 +25,8 @@ other_users=()
 for user in ${all_users[@]}; do
   echo $user
   if [ ! -e "/var/cpanel/users/$i" ]; then
-    usage "$user is not a valid user. Please check for mistypes :)"
+    echo "test"
+    #usage "$user is not a valid user. Please check for mistypes :)"
   fi
 done
 
