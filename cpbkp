@@ -43,6 +43,8 @@ fi
 
 backup_type=$1
 shift
+if [ -z ${1+x} ]; then echo "not dry"; else echo "dry"; fi
+
 
 if ! [[ "$backup_type" =~ daily|weekly|monthly ]]; then
   usage "Backup type must be daily / weekly / monthly"
