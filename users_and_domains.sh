@@ -28,7 +28,7 @@ do
             while read -r database
             do
                 dbname=$(echo ${database} | awk '{print $1}' | sed 's/://')
-                dbsize=$(du -sh /var/lib/mysql/${dbname})
+                dbsize=$(du -sh /var/lib/mysql/${dbname} | awk '{ print $1 }')
                 echo "  - ${dbname} (${dbsize})"
             done <<< "${dbinfo}"
         else
