@@ -14,6 +14,25 @@ do
     echo "Account: ${user}"
         homesize=$(du -sh /home/${user} | awk '{ print $1 }' )
         echo "Size: ${homesize}"
+        if [ -f "/var/cpanel/suspended/${user}" ]
+        then
+            echo "State: Suspended"
+        else
+            echo "State: Active"
+        fi
+        if [ -f "/var/cpanel/datastore/${user}/mysql-db-usage" ]
+        then
+            dbinfo=$(cat /var/cpanel/datastore/${user}/mysql-db-usage)
+            echo "# of databases: $(echo "${dbinfo}" | wc -l)"
+            echo "Databases:"
+            while read -r database
+            do
+                dbname=$(echo ${database} | awk '{print $1}' | sed 's/://')
+                echo "  - ${dbname}"
+            done <<< "${dbinfo}"
+        else
+            echo "# of databases: 0"
+        fi
         echo "Domains:"
         while read -r domain
         do
