@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+if ! type "bc" &> /dev/null
+then
+    echo "bc is required for this script to work. please install with 'yum install bc'"
+    exit 1
+fi
 sane_users=$(cat /etc/userdomains | awk '{print $2}' | sort | uniq)
 
 while read -r user
