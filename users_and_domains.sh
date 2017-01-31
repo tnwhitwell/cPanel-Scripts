@@ -28,7 +28,8 @@ do
             while read -r database
             do
                 dbname=$(echo ${database} | awk '{print $1}' | sed 's/://')
-                echo "  - ${dbname}"
+                dbsize=$(du -sh /var/lib/mysql/${dbname})
+                echo "  - ${dbname} (${dbsize})"
             done <<< "${dbinfo}"
         else
             echo "# of databases: 0"
