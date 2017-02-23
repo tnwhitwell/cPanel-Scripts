@@ -1,10 +1,8 @@
 #!/usr/bin/env python
+
 from __future__ import print_function
 import swiftclient
 import swiftclient.exceptions
-from swiftclient.multithreading import OutputManager
-from swiftclient.service import SwiftError, SwiftService, SwiftUploadObject
-import getopt
 from datetime import datetime
 import sys
 import os
@@ -19,21 +17,23 @@ container_name = ''
 conn = None
 
 available_commands = {
-  'put'   : 'action_put',
-  'get'   : 'action_get',
-  'ls'    : 'action_ls',
-  'mkdir' : 'action_mkdir',
-  'chdir' : 'action_chdir',
-  'rmdir' : 'action_rmdir',
+  'put': 'action_put',
+  'get': 'action_get',
+  'ls': 'action_ls',
+  'mkdir': 'action_mkdir',
+  'chdir': 'action_chdir',
+  'rmdir': 'action_rmdir',
   'delete': 'action_delete'
 }
 
 local_directory = ''
 
+
 def usage(command=None):
     print("""USAGE: swift_cpanel_compliant.py <command> <cwd> <command_args>
 Example:
     swift_cpanel_compliant.py ls /home/tester""")
+
 
 class uploadThread (threading.Thread):
     def __init__(self, threadID, name, container_name, local_file, remote_file):
@@ -61,7 +61,7 @@ def action_put(local_file, remote_file):
         sys.stdout.flush()
     sys.stdout.write('\n')
     try:
-        resp_headers = conn.head_object(container_name, remote_file)
+        conn.head_object(container_name, remote_file)
         print('The object was successfully created')
     except swiftclient.exceptions.ClientException as e:
         if e.http_status == 404:
@@ -70,6 +70,7 @@ def action_put(local_file, remote_file):
             print('An error occurred: ', file=sys.stderr)
             print(e, file=sys.stderr)
         sys.exit(1)
+
 
 def action_get(remote_file, local_file):
     try:
@@ -90,7 +91,7 @@ def action_ls(folder=None):
     outfmt = '%s 1 swift swift %s %s %s'
     if folder:
         if not folder.endswith('/'):
-            folder='%s/' % folder
+            folder = '%s/' % folder
         data = conn.get_container(container_name, prefix=folder)[1]
     else:
         data = conn.get_container(container_name)[1]
@@ -101,7 +102,7 @@ def action_ls(folder=None):
             sizelength = len(bytes)
     for object in data:
         if folder:
-            object['name'] = object['name'].replace(folder,'')
+            object['name'] = object['name'].replace(folder, '')
         if '/' in object['name']:
             continue
         mtimeo = datetime.strptime(object['last_modified'], '%Y-%m-%dT%H:%M:%S.%f')
@@ -111,13 +112,16 @@ def action_ls(folder=None):
             perms = dirperms
         else:
             perms = fileperms
-        print(outfmt %(perms, str(object['bytes']).rjust(sizelength), mtime, object['name']))
+        print(outfmt % (perms, str(object['bytes']).rjust(sizelength), mtime, object['name']))
+
 
 def action_mkdir(remote_directory):
-    upload = conn.put_object(container_name, remote_directory, contents='', content_type='application/directory')
+    conn.put_object(container_name, remote_directory, contents='', content_type='application/directory')
+
 
 def action_chdir(remote_directory):
     print(remote_directory)
+
 
 def action_rmdir(remote_directory):
     files = conn.get_container(container_name, prefix='%s' % remote_directory)[1]
@@ -127,12 +131,15 @@ def action_rmdir(remote_directory):
         except swiftclient.exceptions.ClientException as e:
             print("Failed to delete the object with error: %s" % e, file=sys.stderr)
             sys.exit(1)
+
+
 def action_delete(remote_file):
     try:
         conn.delete_object(container_name, remote_file)
     except swiftclient.exceptions.ClientException as e:
         print("Failed to delete the object with error: %s" % e, file=sys.stderr)
         sys.exit(1)
+
 
 if __name__ == '__main__':
     if len(sys.argv) < 5:
@@ -150,7 +157,7 @@ if __name__ == '__main__':
             key=memstore_key,
             authurl='https://auth.storage.memset.com/v1.0',
     )
-    with open('/tmp/custom_backup_args.txt','a') as log:
+    with open('/tmp/custom_backup_args.txt', 'a') as log:
         log.write('%s\n' % str(sys.argv))
     args = sys.argv[1:]
     command = ''
@@ -159,5 +166,5 @@ if __name__ == '__main__':
     if args[0] in available_commands:
         function = available_commands[args[0]]
         local_directory = args[1]
-        function_args=args[2:-2]
+        function_args = args[2:-2]
         globals()[function](*function_args)
