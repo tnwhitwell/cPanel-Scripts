@@ -185,12 +185,12 @@ def splitCommandArgs(args):
 if __name__ == '__main__':
     args = []
     for k in sys.argv:
-        if '-A' in k:
+        if '-A' and '-c' in k:
             args += k.split(' ')  # split up argv because cPanel is silly
         else:
-            args += k
+            args.append(k)
     with open('/tmp/custom_backup_args.txt', 'a') as log:
-        log.write('%s\n' % str(sys.argv))
+        log.write('%s\n' % str(args))
     options = getOptions(args[1:])
     conn = swiftclient.Connection(
             user=options['user'],
