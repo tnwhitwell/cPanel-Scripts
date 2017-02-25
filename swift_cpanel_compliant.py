@@ -4,26 +4,22 @@ from __future__ import print_function
 import swiftclient
 import swiftclient.exceptions
 from datetime import datetime
+import argparse
 import sys
-import os
+from os import environ
 import threading
 import time
-
-
-memstore_user = ''
-memstore_key = os.environ['PASSWORD']
-container_name = ''
 
 conn = None
 
 available_commands = {
-  'put': 'action_put',
-  'get': 'action_get',
-  'ls': 'action_ls',
-  'mkdir': 'action_mkdir',
-  'chdir': 'action_chdir',
-  'rmdir': 'action_rmdir',
-  'delete': 'action_delete'
+  'put': {'function': 'action_put', 'min_args': 2},
+  'get': {'function': 'action_get', 'min_args': 2},
+  'ls': {'function': 'action_ls', 'min_args': 0},
+  'mkdir': {'function': 'action_mkdir', 'min_args': 1},
+  'chdir': {'function': 'action_chdir', 'min_args': 1},
+  'rmdir': {'function': 'action_rmdir', 'min_args': 1},
+  'delete': {'function': 'action_delete', 'min_args': 1},
 }
 
 local_directory = ''
@@ -49,7 +45,7 @@ class uploadThread (threading.Thread):
             conn.put_object(self.container_name, self.remote_file, contents=file_to_put)
 
 
-def action_put(local_file, remote_file):
+def action_put(container_name, local_file, remote_file):
     sys.stdout.write('Uploading')
     sys.stdout.flush()
     upThread = uploadThread(1, 'UploadThread', container_name, local_file, remote_file)
@@ -72,7 +68,7 @@ def action_put(local_file, remote_file):
         sys.exit(1)
 
 
-def action_get(remote_file, local_file):
+def action_get(container_name, remote_file, local_file):
     try:
         resp_headers, obj_contents = conn.get_object(container_name, remote_file)
         with open(local_file, 'w') as local:
@@ -85,7 +81,7 @@ def action_get(remote_file, local_file):
         sys.exit(1)
 
 
-def action_ls(folder=None):
+def action_ls(container_name, folder=None):
     dirperms = 'drwxr--r--'
     fileperms = '-rw-r--r--'
     outfmt = '%s 1 swift swift %s %s %s'
@@ -115,15 +111,15 @@ def action_ls(folder=None):
         print(outfmt % (perms, str(object['bytes']).rjust(sizelength), mtime, object['name']))
 
 
-def action_mkdir(remote_directory):
+def action_mkdir(container_name, remote_directory):
     conn.put_object(container_name, remote_directory, contents='', content_type='application/directory')
 
 
-def action_chdir(remote_directory):
+def action_chdir(container_name, remote_directory):
     print(remote_directory)
 
 
-def action_rmdir(remote_directory):
+def action_rmdir(container_name, remote_directory):
     files = conn.get_container(container_name, prefix='%s' % remote_directory)[1]
     for filename in files:
         try:
@@ -133,7 +129,7 @@ def action_rmdir(remote_directory):
             sys.exit(1)
 
 
-def action_delete(remote_file):
+def action_delete(container_name, remote_file):
     try:
         conn.delete_object(container_name, remote_file)
     except swiftclient.exceptions.ClientException as e:
@@ -141,32 +137,63 @@ def action_delete(remote_file):
         sys.exit(1)
 
 
+def getOptions(args=None, error=None):
+    parser = argparse.ArgumentParser(
+        description='cPanel Custom backup destination for Openstack Swift')
+
+    default_key = None
+    for k in ('PASSWORD', 'ST_AUTH', 'OS_IDENTITY_API_VERSION'):
+        try:
+            default_key = environ[k]
+            break
+        except KeyError:
+            pass
+
+    parser.add_argument('command_args',
+                        type=str, nargs='+', help='Arguments to run')
+    parser.add_argument('-U', '--user', dest='user',
+                        default=environ.get('ST_USER'),
+                        help='User name for obtaining an auth token.')
+    parser.add_argument('-K', '--key', dest='key',
+                        default=default_key,
+                        help='Key for obtaining an auth token.')
+    parser.add_argument('-c', '--container', dest='container',
+                        help='Swift container to use', required=True)
+    parser.add_argument('-A', '--auth', dest='authurl',
+                        default=environ.get('ST_AUTH'),
+                        help='URL for obtaining an auth token.')
+    if error:
+        parser.print_usage()
+        print(error, file=sys.stderr)
+        sys.exit(1)
+    out = vars(parser.parse_args(args))
+    for k in ['user', 'key', 'authurl']:
+        if not out[k]:
+            getOptions(error='error: %s not provided as argument or environment' % k.upper())
+    return out
+
+
+def splitCommandArgs(args):
+    out = {}
+    out['command'] = args[0]
+    out['pwd'] = args[1]
+    out['command_args'] = args[2:]
+    return out
+
+
 if __name__ == '__main__':
-    if len(sys.argv) < 5:
-        print('some arguments must be missing!', file=sys.stderr)
-    memstore_user = sys.argv[-1]
-    container_name = sys.argv[-2]
-    if memstore_key == '':
-        print('Password must be set', file=sys.stderr)
-    if memstore_user == '':
-        print('Username must be set', file=sys.stderr)
-    if container_name == '':
-        print('Container name (Remote Host) must be set', file=sys.stderr)
+    options = getOptions(sys.argv[1:])
     conn = swiftclient.Connection(
-            user=memstore_user,
-            key=memstore_key,
-            authurl='https://auth.storage.memset.com/v1.0',
+            user=options['user'],
+            key=options['key'],
+            authurl=options['authurl'],
     )
-    with open('/tmp/custom_backup_args.txt', 'a') as log:
-        log.write('%s\n' % str(sys.argv))
-    args = sys.argv[1:]
-    command = ''
-    if len(args) < 2:
-        usage()
-    if args[0] in available_commands:
-        function = available_commands[args[0]]
-        local_directory = args[1]
-        function_args = args[2:-2]
-        globals()[function](*function_args)
-
-
+    commandline = splitCommandArgs(options['command_args'])
+    command = commandline['command']
+    if command in available_commands:
+        no_args = len(commandline['command_args'])
+        if no_args < available_commands[command]['min_args']:
+            print('Too few arguments provided', file=sys.stderr)
+            sys.exit(1)
+        function = available_commands[command]['function']
+        globals()[function](options['container'], *commandline['command_args'])
