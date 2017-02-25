@@ -164,12 +164,12 @@ def getOptions(args=None, error=None):
                         help='URL for obtaining an auth token.')
     if error:
         parser.print_usage()
-        print(error, file=sys.stderr)
+        print('error: %s' % error, file=sys.stderr)
         sys.exit(1)
     out = vars(parser.parse_args(args))
     for k in ('user', 'key', 'authurl'):
         if not out[k]:
-            getOptions(error='error: %s not provided as argument or environment' % k.upper())
+            getOptions(error='%s not provided as argument or environment' % k.upper())
     return out
 
 
@@ -192,8 +192,10 @@ if __name__ == '__main__':
     command = commandline['command']
     if command in available_commands:
         no_args = len(commandline['command_args'])
-        if no_args < available_commands[command]['min_args']:
-            print('Too few arguments provided', file=sys.stderr)
+        min_args = available_commands[command]['min_args']
+        if no_args < min_args:
+            getOptions(error='Too few arguments provided for '
+                             '%s - at least %s required, %s provided.' % (command, min_args, no_args))
             sys.exit(1)
         function = available_commands[command]['function']
         globals()[function](options['container'], *commandline['command_args'])
