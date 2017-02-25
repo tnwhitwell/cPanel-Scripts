@@ -142,7 +142,7 @@ def getOptions(args=None, error=None):
         description='cPanel Custom backup destination for Openstack Swift')
 
     default_key = None
-    for k in ('PASSWORD', 'ST_AUTH', 'OS_IDENTITY_API_VERSION'):
+    for k in ('PASSWORD', 'ST_KEY'):
         try:
             default_key = environ[k]
             break
@@ -167,7 +167,7 @@ def getOptions(args=None, error=None):
         print(error, file=sys.stderr)
         sys.exit(1)
     out = vars(parser.parse_args(args))
-    for k in ['user', 'key', 'authurl']:
+    for k in ('user', 'key', 'authurl'):
         if not out[k]:
             getOptions(error='error: %s not provided as argument or environment' % k.upper())
     return out
