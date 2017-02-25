@@ -9,7 +9,6 @@ import sys
 from os import environ
 import threading
 import time
-import shlex
 
 conn = None
 
