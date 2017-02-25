@@ -9,6 +9,7 @@ import sys
 from os import environ
 import threading
 import time
+import shlex
 
 conn = None
 
@@ -182,7 +183,10 @@ def splitCommandArgs(args):
 
 
 if __name__ == '__main__':
-    options = getOptions(sys.argv[1:])
+    argv = shlex.split(sys.argv)  # split up argv because cPanel is silly
+    with open('/tmp/custom_backup_args.txt', 'a') as log:
+        log.write('%s\n' % str(sys.argv))
+    options = getOptions(argv[1:])
     conn = swiftclient.Connection(
             user=options['user'],
             key=options['key'],
