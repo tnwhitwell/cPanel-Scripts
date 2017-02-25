@@ -183,10 +183,15 @@ def splitCommandArgs(args):
 
 
 if __name__ == '__main__':
-    argv = shlex.split(sys.argv)  # split up argv because cPanel is silly
+    args = []
+    for k in sys.argv:
+        if '-A' in k:
+            args += k.split(' ')  # split up argv because cPanel is silly
+        else:
+            args += k
     with open('/tmp/custom_backup_args.txt', 'a') as log:
         log.write('%s\n' % str(sys.argv))
-    options = getOptions(argv[1:])
+    options = getOptions(args[1:])
     conn = swiftclient.Connection(
             user=options['user'],
             key=options['key'],
